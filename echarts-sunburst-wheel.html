@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>个人工作AI工具使用全景</title>
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -56,13 +56,23 @@
       box-shadow: 8px 8px 0 #000000;
       opacity: 1;
     }
-    .topbar {
+    .dashboard {
       position: relative;
       z-index: 1;
       display: grid;
-      grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(220px, 0.7fr));
+      grid-template-columns: minmax(0, 1fr) 300px;
       gap: 18px;
-      align-items: stretch;
+      align-items: start;
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+    }
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      min-height: 0;
+      width: 300px;
     }
     .panel {
       background: #FFF1DE;
@@ -74,26 +84,14 @@
       position: relative;
       overflow: hidden;
     }
-    .hero::after {
-      content: "";
-      position: absolute;
-      width: 88px;
-      height: 88px;
-      right: 18px;
-      top: 16px;
-      border: 4px solid #000000;
-      border-radius: 50%;
-      background: #00D68F;
-      box-shadow: 6px 6px 0 #000000;
-    }
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       margin-bottom: 14px;
-      padding: 6px 12px;
-      font-size: 12px;
-      font-weight: 800;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 900;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       border: 4px solid #000000;
@@ -129,6 +127,24 @@
       line-height: 1.65;
       font-weight: 700;
       color: #2B2B2B;
+    }
+    .side-card {
+      padding: 22px 24px 20px;
+      position: relative;
+      overflow: hidden;
+      min-height: 176px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    .side-card-text {
+      position: relative;
+      z-index: 1;
+      margin-top: 16px;
+      font-size: 15px;
+      line-height: 1.7;
+      font-weight: 800;
+      color: #1F1F1F;
     }
     .mini-card {
       padding: 18px 18px 16px;
@@ -183,6 +199,7 @@
       position: relative;
       z-index: 1;
       flex: 1 1 auto;
+      min-width: 0;
       min-height: 0;
       background: #FFF8EF;
       border: 4px solid #000000;
@@ -252,30 +269,17 @@
       background: #00D68F;
       display: inline-block;
     }
-    .chart-meta {
-      display: flex;
-      gap: 10px;
-    }
-    .chart-pill {
-      padding: 8px 12px;
-      font-size: 12px;
-      font-weight: 800;
-      color: #111111;
-      background: #FFFFFF;
-      border: 4px solid #000000;
-      box-shadow: 6px 6px 0 #000000;
-    }
     .chart-container {
       width: 100%;
       height: 100%;
-      min-height: 860px;
+      min-height: 920px;
       position: relative;
       padding: 70px 12px 12px;
     }
     #chart {
       width: 100%;
       height: 100%;
-      min-height: 780px;
+      min-height: 840px;
     }
     .legend {
       position: absolute;
@@ -314,46 +318,45 @@
       box-shadow: 2px 2px 0 #000000;
     }
     @media (max-width: 1180px) {
-      .topbar {
+      .dashboard {
         grid-template-columns: 1fr;
       }
-      .chart-meta {
-        display: none;
+      .side-panel {
+        order: 2;
       }
     }
   </style>
 </head>
 <body>
   <div class="page">
-    <div class="topbar">
-      <div class="panel hero">
-        <div class="badge">Sunburst Intelligence</div>
-        <h1 id="page-title">个人工作AI工具使用全景</h1>
-        <div class="hero-subtitle">多层同心旭日图以能力熟练度为主轴，使用编辑级信息图版式、粗黑描边与硬阴影语言，强调扫描效率、视觉秩序与专业感。</div>
-      </div>
-      <div class="panel mini-card blue">
-        <div class="mini-card-label">Capability Focus</div>
-        <div class="mini-card-value">High / Medium / Low</div>
-        <div class="mini-card-note">按熟练度进行连续聚类，确保同色能力块集中展示。</div>
-      </div>
-      <div class="panel mini-card red">
-        <div class="mini-card-label">Visual System</div>
-        <div class="mini-card-value">Flat 2D + Hard Shadow</div>
-        <div class="mini-card-note">皇家蓝、薄荷绿、亮黄为主色，番茄红作为界面强调色。</div>
-      </div>
-    </div>
-    <div class="chart-shell">
-      <div class="chart-header">
-        <div class="chart-title">Tool Capability Map</div>
-        <div class="chart-meta">
-          <div class="chart-pill">Neo-Brutalism</div>
-          <div class="chart-pill">Premium Dashboard</div>
+    <div class="dashboard">
+      <div class="chart-shell">
+        <div class="chart-header">
+          <div class="chart-title">AI 能力地图</div>
+        </div>
+        <div class="chart-container">
+          <div id="chart"></div>
+          <div class="legend" id="legend-container">
+            <div class="legend-title">Legend</div>
+          </div>
         </div>
       </div>
-      <div class="chart-container">
-        <div id="chart"></div>
-        <div class="legend" id="legend-container">
-          <div class="legend-title">Legend</div>
+      <div class="side-panel">
+        <div class="panel side-card">
+          <div class="badge">优化工作方法</div>
+          <div class="side-card-text">将周报自动生成方法论复用至电商运营场景，自动归集流量、转化数据，输出标准化电商战略周报。</div>
+        </div>
+        <div class="panel side-card">
+          <div class="badge">跨界协作</div>
+          <div class="side-card-text">扩大能力边界,系统体系化了解整体系统的概念。阅读系统说明书了解机械结构并对系统有整体认知。</div>
+        </div>
+        <div class="panel side-card">
+          <div class="badge">创新意识</div>
+          <div class="side-card-text">仪器AI应用方案拟定,融合语音交互,NPU YOLO目标识别方案的提出。</div>
+        </div>
+        <div class="panel side-card">
+          <div class="badge">知识迁移</div>
+          <div class="side-card-text">将已验证的方法论、分析框架与工具能力迁移到不同业务场景，复用经验沉淀，加速新场景落地。</div>
         </div>
       </div>
     </div>
@@ -530,7 +533,6 @@
 
     // 动态更新页面标题
     if (INPUT_JSON.theme) {
-      document.getElementById('page-title').textContent = INPUT_JSON.theme;
       document.title = INPUT_JSON.theme;
     }
 
@@ -782,6 +784,9 @@
               overflow: "break",
               lineHeight: 14
             },
+            labelLayout: {
+              hideOverlap: true
+            },
             levels: [
               {}, // Root
               {
@@ -842,7 +847,7 @@
                   width: 72,
                   lineHeight: 11,
                   formatter: function(params) {
-                    return wrapTextForSector(params.name, 5, 4);
+                    return wrapTextForSector(params.name, 5, 3);
                   }
                 }
               }
