@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>个人工作AI工具使用全景</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background-color: #F7D84B;
+      background-image: radial-gradient(#000000 1.3px, transparent 1.3px);
+      background-size: 18px 18px;
+      color: #111111;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Microsoft YaHei", sans-serif;
+    }
+    .page {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+      padding: 26px 28px 28px;
+      gap: 22px;
+    }
+    .page::before,
+    .page::after {
+      content: "";
+      position: absolute;
+      border: 3px solid #000000;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .page::before {
+      width: 180px;
+      height: 180px;
+      right: 34px;
+      top: 24px;
+      background: #FFF3E0;
+      box-shadow: 8px 8px 0 #000000;
+      opacity: 1;
+    }
+    .page::after {
+      width: 120px;
+      height: 120px;
+      left: 28px;
+      bottom: 28px;
+      border-radius: 50%;
+      background: #FF5A5F;
+      box-shadow: 8px 8px 0 #000000;
+      opacity: 1;
+    }
+    .topbar {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(220px, 0.7fr));
+      gap: 18px;
+      align-items: stretch;
+    }
+    .panel {
+      background: #FFF1DE;
+      border: 4px solid #000000;
+      box-shadow: 10px 10px 0 #000000;
+    }
+    .hero {
+      padding: 22px 24px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 88px;
+      height: 88px;
+      right: 18px;
+      top: 16px;
+      border: 4px solid #000000;
+      border-radius: 50%;
+      background: #00D68F;
+      box-shadow: 6px 6px 0 #000000;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 4px solid #000000;
+      background: #FF5A5F;
+      color: #FFFFFF;
+      box-shadow: 6px 6px 0 #000000;
+    }
+    .badge::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border: 3px solid #000000;
+      background: #FFE95C;
+      display: inline-block;
+    }
+    h1 {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      font-size: 32px;
+      line-height: 1.05;
+      font-weight: 900;
+      color: #111111;
+      letter-spacing: 0.02em;
+      max-width: 720px;
+    }
+    .hero-subtitle {
+      position: relative;
+      z-index: 1;
+      margin-top: 12px;
+      max-width: 760px;
+      font-size: 14px;
+      line-height: 1.65;
+      font-weight: 700;
+      color: #2B2B2B;
+    }
+    .mini-card {
+      padding: 18px 18px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 138px;
+    }
+    .mini-card-label {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #111111;
+    }
+    .mini-card-value {
+      margin-top: 18px;
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1.15;
+      color: #111111;
+    }
+    .mini-card-note {
+      margin-top: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 700;
+      color: #333333;
+    }
+    .mini-card.blue {
+      background: #4169E1;
+      color: #FFFFFF;
+    }
+    .mini-card.blue .mini-card-label,
+    .mini-card.blue .mini-card-value,
+    .mini-card.blue .mini-card-note {
+      color: #FFFFFF;
+    }
+    .mini-card.yellow {
+      background: #FFF1DE;
+    }
+    .mini-card.red {
+      background: #FF5A5F;
+      color: #FFFFFF;
+    }
+    .mini-card.red .mini-card-label,
+    .mini-card.red .mini-card-value,
+    .mini-card.red .mini-card-note {
+      color: #FFFFFF;
+    }
+    .chart-shell {
+      position: relative;
+      z-index: 1;
+      flex: 1 1 auto;
+      min-height: 0;
+      background: #FFF8EF;
+      border: 4px solid #000000;
+      box-shadow: 12px 12px 0 #000000;
+      overflow: hidden;
+    }
+    .chart-shell::before,
+    .chart-shell::after {
+      content: "";
+      position: absolute;
+      border: 4px solid #000000;
+      pointer-events: none;
+      opacity: 1;
+    }
+    .chart-shell::before {
+      width: 140px;
+      height: 140px;
+      left: 20px;
+      top: 18px;
+      background:
+        linear-gradient(90deg, transparent 46%, #000000 46%, #000000 54%, transparent 54%),
+        linear-gradient(transparent 46%, #000000 46%, #000000 54%, transparent 54%);
+      background-size: 24px 24px;
+      background-color: #FFE95C;
+      transform: rotate(8deg);
+    }
+    .chart-shell::after {
+      width: 96px;
+      height: 96px;
+      right: 22px;
+      bottom: 22px;
+      border-radius: 50%;
+      background: #4169E1;
+      box-shadow: 6px 6px 0 #000000;
+    }
+    .chart-header {
+      position: absolute;
+      top: 16px;
+      left: 18px;
+      right: 18px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      pointer-events: none;
+    }
+    .chart-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #111111;
+      background: #FFFFFF;
+      border: 4px solid #000000;
+      box-shadow: 6px 6px 0 #000000;
+    }
+    .chart-title::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border: 3px solid #000000;
+      background: #00D68F;
+      display: inline-block;
+    }
+    .chart-meta {
+      display: flex;
+      gap: 10px;
+    }
+    .chart-pill {
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #111111;
+      background: #FFFFFF;
+      border: 4px solid #000000;
+      box-shadow: 6px 6px 0 #000000;
+    }
+    .chart-container {
+      width: 100%;
+      height: 100%;
+      min-height: 860px;
+      position: relative;
+      padding: 70px 12px 12px;
+    }
+    #chart {
+      width: 100%;
+      height: 100%;
+      min-height: 780px;
+    }
+    .legend {
+      position: absolute;
+      bottom: 18px;
+      right: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #FFF8EF;
+      padding: 14px 16px;
+      border: 4px solid #000000;
+      box-shadow: 6px 6px 0 #000000;
+      z-index: 2;
+    }
+    .legend-title {
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #111111;
+      margin-bottom: 4px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #111111;
+    }
+    .legend-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 0;
+      border: 3px solid #000000;
+      box-shadow: 2px 2px 0 #000000;
+    }
+    @media (max-width: 1180px) {
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+      .chart-meta {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="panel hero">
+        <div class="badge">Sunburst Intelligence</div>
+        <h1 id="page-title">个人工作AI工具使用全景</h1>
+        <div class="hero-subtitle">多层同心旭日图以能力熟练度为主轴，使用编辑级信息图版式、粗黑描边与硬阴影语言，强调扫描效率、视觉秩序与专业感。</div>
+      </div>
+      <div class="panel mini-card blue">
+        <div class="mini-card-label">Capability Focus</div>
+        <div class="mini-card-value">High / Medium / Low</div>
+        <div class="mini-card-note">按熟练度进行连续聚类，确保同色能力块集中展示。</div>
+      </div>
+      <div class="panel mini-card red">
+        <div class="mini-card-label">Visual System</div>
+        <div class="mini-card-value">Flat 2D + Hard Shadow</div>
+        <div class="mini-card-note">皇家蓝、薄荷绿、亮黄为主色，番茄红作为界面强调色。</div>
+      </div>
+    </div>
+    <div class="chart-shell">
+      <div class="chart-header">
+        <div class="chart-title">Tool Capability Map</div>
+        <div class="chart-meta">
+          <div class="chart-pill">Neo-Brutalism</div>
+          <div class="chart-pill">Premium Dashboard</div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <div id="chart"></div>
+        <div class="legend" id="legend-container">
+          <div class="legend-title">Legend</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // JSON 数据
+    const INPUT_JSON = { 
+      "theme": "个人工作AI工具使用全景", 
+      "proficiency_level": { 
+        "high": { 
+          "name": "高频精通", 
+          "color": "#4169E1" 
+        }, 
+        "medium": { 
+          "name": "中频熟练", 
+          "color": "#00D68F" 
+        }, 
+        "low": { 
+          "name": "低频试用", 
+          "color": "#FF5A5F" 
+        } 
+      }, 
+      "category_list": [ 
+        { 
+          "category_name": "代码开发与UI落地类", 
+          "tools": [ 
+            { 
+              "tool_name": "Doubao（豆包）", 
+              "practice": [ 
+                "Qt/LVGL界面代码快速生成", 
+                "UI交互逻辑编写", 
+                "需求转代码、编译报错排查", 
+                "日志解析、技术方案撰写" 
+              ], 
+              "proficiency": "high" 
+            }, 
+            { 
+              "tool_name": "DeepSeek", 
+              "practice": [ 
+                "嵌入式底层UI驱动开发", 
+                "C/Rust界面逻辑编码", 
+                "芯片平台界面适配", 
+                "复杂逻辑代码编写" 
+              ], 
+              "proficiency": "high" 
+            }, 
+            { 
+              "tool_name": "Qianwen（通义千问）", 
+              "practice": [ 
+                "简易UI原型生成", 
+                "界面文案撰写", 
+                "轻量代码片段生成" 
+              ], 
+              "proficiency": "low" 
+            }, 
+            { 
+              "tool_name": "ClaudeCode", 
+              "practice": [ 
+                "大型工程代码通读梳理", 
+                "UI项目重构复盘", 
+                "长链路代码逻辑拆解" 
+              ], 
+              "proficiency": "low" 
+            } 
+          ] 
+        }, 
+        { 
+          "category_name": "代码架构与质量分析类", 
+          "tools": [ 
+            { 
+              "tool_name": "Arch Skills", 
+              "practice": [ 
+                "解析项目整体代码架构", 
+                "自动统计代码行数", 
+                "识别坏代码/冗余代码", 
+                "批量梳理TODO优化点", 
+                "代码重构前置质检" 
+              ], 
+              "proficiency": "high" 
+            } 
+          ] 
+        }, 
+        { 
+          "category_name": "智能体与端侧AI类", 
+          "tools": [ 
+            { 
+              "tool_name": "Coze（扣子）", 
+              "practice": [ 
+                "自定义AI智能体搭建", 
+                "对接知识库实现自动化流程", 
+                "工作流编排" 
+              ], 
+              "proficiency": "medium" 
+            }, 
+            { 
+              "tool_name": "Gemini Nano", 
+              "practice": [ 
+                "本地离线轻量化推理", 
+                "轻量本地辅助计算", 
+                "无网络场景AI辅助" 
+              ], 
+              "proficiency": "low" 
+            } 
+          ] 
+        }, 
+        { 
+          "category_name": "办公效率与事务类", 
+          "tools": [ 
+            { 
+              "tool_name": "周报归纳AI", 
+              "practice": [ 
+                "自动归集周度工作内容", 
+                "生成标准化周报", 
+                "提炼工作成果" 
+              ], 
+              "proficiency": "low" 
+            }, 
+            { 
+              "tool_name": "WorkBuddy", 
+              "practice": [ 
+                "每日杂事收集归集", 
+                "待办事项定时提醒", 
+                "日常事务数字化管理" 
+              ], 
+              "proficiency": "medium" 
+            } 
+          ] 
+        }, 
+        { 
+          "category_name": "知识沉淀与工程数据类", 
+          "tools": [ 
+            { 
+              "tool_name": "飞书（AI+多维表格）", 
+              "practice": [ 
+                "批量采集医学论文，搭建专业文献知识库", 
+                "多维表格搭建协议数据台账", 
+                "调试通信协议、快速检索协议报文数据" 
+              ], 
+              "proficiency": "medium" 
+            } 
+          ] 
+        }, 
+        { 
+          "category_name": "内容运营与流量分析类", 
+          "tools": [ 
+            { 
+              "tool_name": "小红书Skills", 
+              "practice": [ 
+                "小红书账号流量数据分析、选题拆解", 
+                "落地「中医养生+慢阻肺」科普内容创作", 
+                "优化内容提升用户收藏率" 
+              ], 
+              "proficiency": "low" 
+            } 
+          ] 
+        }, 
+        { 
+          "category_name": "本地隐私化学习类", 
+          "tools": [ 
+            { 
+              "tool_name": "Obsidian", 
+              "practice": [ 
+                "本地离线搭建医学知识库", 
+                "医学知识点碎片化拆分、生成记忆卡片", 
+                "纯本地存储，无隐私泄露风险" 
+              ], 
+              "proficiency": "high" 
+            } 
+          ] 
+        } 
+      ] 
+    };
+
+    // 动态更新页面标题
+    if (INPUT_JSON.theme) {
+      document.getElementById('page-title').textContent = INPUT_JSON.theme;
+      document.title = INPUT_JSON.theme;
+    }
+
+    // 从 JSON 中提取熟练度配置
+    const PROFICIENCY_COLOR = {};
+    const PROFICIENCY_TEXT = {};
+    if (INPUT_JSON.proficiency_level) {
+      for (const [key, config] of Object.entries(INPUT_JSON.proficiency_level)) {
+        PROFICIENCY_COLOR[key] = config.color;
+        PROFICIENCY_TEXT[key] = config.name;
+      }
+    } else {
+      PROFICIENCY_COLOR.high = "#4169E1";
+      PROFICIENCY_COLOR.medium = "#00D68F";
+      PROFICIENCY_COLOR.low = "#FF5A5F";
+      PROFICIENCY_TEXT.high = "高频精通";
+      PROFICIENCY_TEXT.medium = "中频熟练";
+      PROFICIENCY_TEXT.low = "低频试用";
+    }
+
+    // 动态生成图例
+    const legendContainer = document.getElementById('legend-container');
+    const order = ['high', 'medium', 'low'];
+    order.forEach(key => {
+      if (PROFICIENCY_COLOR[key]) {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.innerHTML = `<span class="legend-dot" style="background:${PROFICIENCY_COLOR[key]};"></span>${PROFICIENCY_TEXT[key]}`;
+        legendContainer.appendChild(item);
+      }
+    });
+
+    // 排序权重
+    function proficiencyWeight(key) {
+      return { high: 3, medium: 2, low: 1 }[key] || 1;
+    }
+
+    // 文本截断辅助函数：超过 maxLength 就截断并加 ...
+    function truncateText(text, maxLen) {
+      if (!text) return "";
+      if (text.length > maxLen) {
+        return text.substring(0, maxLen) + '...';
+      }
+      return text;
+    }
+
+    // 标签自动换行：优先保持文字在扇形内部，一行放不下就换到下一行
+    function wrapTextForSector(text, maxCharsPerLine, maxLines) {
+      if (!text) return "";
+      const normalized = String(text).trim();
+      if (!normalized) return "";
+
+      const lines = [];
+      let current = "";
+
+      for (const ch of normalized) {
+        if (current.length >= maxCharsPerLine) {
+          lines.push(current);
+          current = ch;
+        } else {
+          current += ch;
+        }
+      }
+
+      if (current) lines.push(current);
+
+      if (lines.length <= maxLines) {
+        return lines.join("\n");
+      }
+
+      const clipped = lines.slice(0, maxLines);
+      const lastLine = clipped[maxLines - 1];
+      clipped[maxLines - 1] = truncateText(lastLine, Math.max(1, maxCharsPerLine - 1));
+      return clipped.join("\n");
+    }
+
+    /**
+     * 构建树结构
+     * 为保证“每个工具扇形宽度统一均衡”，我们强制给 Tool 赋予 value = 1。
+     * ECharts 的 sunburst 如果子节点有 value，会按比例分配。
+     * 因此，给 Practice 也赋予 value = 1，它们就会平分所在的 Tool 的扇区；
+     * 而每个 Tool 因为被外层强制固定了 value，所以所有 Tool 的视觉夹角完全一样！
+     */
+    function buildTree(json) {
+      const categories = json.category_list || [];
+      const data = [];
+
+      categories.forEach(category => {
+        const tools = category.tools || [];
+        if (tools.length === 0) return;
+
+        // 按熟练度将工具分组，避免同一个大类下出现不同颜色的工具互相穿插
+        const groupedTools = { high: [], medium: [], low: [] };
+        tools.forEach(t => {
+          const p = PROFICIENCY_COLOR[t.proficiency] ? t.proficiency : "low";
+          groupedTools[p].push(t);
+        });
+
+        // 将同一个大类按熟练度拆分成多个节点，确保能进行全局颜色聚合
+        ['high', 'medium', 'low'].forEach(prof => {
+          const profTools = groupedTools[prof];
+          if (profTools.length === 0) return;
+
+          const catColor = PROFICIENCY_COLOR[prof];
+
+          const toolNodes = profTools.map(tool => {
+            const toolBaseColor = PROFICIENCY_COLOR[tool.proficiency] || PROFICIENCY_COLOR.low;
+            const practices = tool.practice || [];
+            
+            const practiceNodes = practices.map(pName => ({
+              name: pName,
+              value: 1, // 让 practice 平分所在 tool 的空间
+              proficiency: tool.proficiency,
+              itemStyle: {
+                color: toolBaseColor,
+                borderColor: "#000000",
+                borderWidth: 2
+              }
+            }));
+
+            return {
+              name: tool.tool_name,
+              value: 1, // 核心：强制每个工具的宽度统一（不按实践数量伸缩）
+              proficiency: tool.proficiency,
+              _allPractices: practices, // 存给 tooltip 使用
+              itemStyle: {
+                color: toolBaseColor,
+                borderColor: "#000000",
+                borderWidth: 2
+              },
+              children: practiceNodes
+            };
+          });
+
+          data.push({
+            name: category.category_name,
+            proficiency: prof,
+            value: toolNodes.length, // 大类宽度 = 内部工具数量的总和
+            itemStyle: {
+              color: catColor,
+              borderColor: "#000000",
+              borderWidth: 2
+            },
+            children: toolNodes
+          });
+        });
+      });
+
+      // 全局大类按熟练度权重严格排序，这样所有的 high 都在一起，medium 在一起，low 在一起
+      data.sort((a, b) => proficiencyWeight(b.proficiency) - proficiencyWeight(a.proficiency));
+
+      return data;
+    }
+
+    function createOption(data) {
+      return {
+        backgroundColor: "transparent",
+        animation: true,
+        animationDuration: 1000,
+        toolbox: {
+          show: true,
+          top: 20,
+          right: 40,
+          itemSize: 18,
+          iconStyle: {
+            borderColor: "#000000",
+            borderWidth: 2
+          },
+          emphasis: {
+            iconStyle: {
+              borderColor: "#E63946"
+            }
+          },
+          feature: {
+            saveAsImage: {
+              title: "保存图片",
+              type: "png",
+              name: "工具能力多层同心旭日图",
+              pixelRatio: 2,
+              backgroundColor: "#FAF9F6"
+            }
+          }
+        },
+        tooltip: {
+          trigger: "item",
+          backgroundColor: "#FFFFFF",
+          borderColor: "#000000",
+          borderWidth: 3,
+          padding: 16,
+          extraCssText: "box-shadow: 6px 6px 0 #000000; border-radius: 0;",
+          textStyle: {
+            color: "#111111",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+            fontSize: 13,
+            fontWeight: 700
+          },
+          formatter(params) {
+            const dataItem = params.data || {};
+            const treePath = params.treePathInfo || [];
+            if (treePath.length <= 1) return "";
+            
+            const category = treePath[1] ? treePath[1].name : "";
+            const tool = treePath[2] ? treePath[2].name : "";
+            const practice = treePath[3] ? treePath[3].name : "";
+            
+            const prof = dataItem.proficiency ? (PROFICIENCY_TEXT[dataItem.proficiency] || dataItem.proficiency) : "继承分类色系";
+            
+            let html = "<div style='font-size:15px;font-weight:bold;margin-bottom:10px;color:#111;'>" + params.name + "</div>";
+            html += "<div style='line-height:1.8;'><strong>分类：</strong>" + category + "</div>";
+            
+            if (tool) {
+              html += "<div style='line-height:1.8;'><strong>工具：</strong>" + tool + "</div>";
+            }
+            
+            // 如果悬浮在工具层，显示全部实践；悬浮在实践层，只显示当前实践
+            if (practice) {
+               html += "<div style='line-height:1.8;'><strong>当前场景：</strong>" + practice + "</div>";
+            } else if (dataItem._allPractices && dataItem._allPractices.length > 0) {
+               html += "<div style='line-height:1.8;margin-top:4px;'><strong>全部场景：</strong><br/>- " + dataItem._allPractices.join("<br/>- ") + "</div>";
+            }
+            
+            if (prof && treePath.length > 1) {
+               html += "<div style='line-height:1.8;margin-top:4px;'><strong>熟练度：</strong>" + prof + "</div>";
+            }
+            
+            return html;
+          }
+        },
+        series: [
+          {
+            type: "sunburst",
+            nodeClick: false,
+            sort: null,
+            data: data,
+            center: ["48%", "52%"],
+            radius: ["10%", "94%"],
+            itemStyle: {
+              borderWidth: 2,
+              borderColor: "#000000"
+            },
+            label: {
+              show: true,
+              rotate: "radial", // 恢复径向旋转，避免文字在圆心处互相挤压重叠
+              align: "center",
+              verticalAlign: "middle",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+              color: "#FFFFFF",
+              fontWeight: 900,
+              overflow: "break",
+              lineHeight: 14
+            },
+            levels: [
+              {}, // Root
+              {
+                // Level 1: 大类 (内层)
+                r0: "10%",
+                r: "33%",
+                label: {
+                  fontSize: 12,
+                  fontWeight: 900,
+                  color: "#FFFFFF",
+                  textBorderColor: "#000000",
+                  textBorderWidth: 1,
+                  align: "center",
+                  verticalAlign: "middle",
+                  overflow: "break",
+                  width: 90,
+                  lineHeight: 14,
+                  formatter: function(params) {
+                    return wrapTextForSector(params.name, 6, 3);
+                  }
+                }
+              },
+              {
+                // Level 2: 工具 (中层)
+                r0: "33%",
+                r: "62%",
+                label: {
+                  fontSize: 11,
+                  fontWeight: 900,
+                  color: "#FFFFFF",
+                  textBorderColor: "#000000",
+                  textBorderWidth: 1,
+                  align: "center",
+                  verticalAlign: "middle",
+                  overflow: "break",
+                  width: 96,
+                  lineHeight: 13,
+                  formatter: function(params) {
+                    return wrapTextForSector(params.name, 7, 3);
+                  }
+                }
+              },
+              {
+                // Level 3: 实践 (外层)
+                r0: "62%",
+                r: "94%",
+                label: {
+                  show: true,
+                  rotate: 0,
+                  fontSize: 9,
+                  fontWeight: 900,
+                  color: "#FFFFFF",
+                  textBorderColor: "transparent",
+                  textBorderWidth: 0,
+                  align: "center",
+                  verticalAlign: "middle",
+                  overflow: "break",
+                  width: 72,
+                  lineHeight: 11,
+                  formatter: function(params) {
+                    return wrapTextForSector(params.name, 5, 4);
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      };
+    }
+
+    function renderChart() {
+      const data = buildTree(INPUT_JSON);
+      const chart = echarts.init(document.getElementById("chart"), null, { renderer: "canvas" });
+      chart.setOption(createOption(data));
+      window.addEventListener("resize", () => chart.resize());
+    }
+
+    renderChart();
+  </script>
+</body>
+</html>
